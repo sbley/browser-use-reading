@@ -26,31 +26,36 @@ Sign in before if necessary.
 ### Step 2: Confirm pending read assignments
 For each item in the table of pending read assignments
   - Open the page
-  - Scroll to the very bottom of the page
-  - Click on the "Confirm" link
+  - Scroll down to the "Confirm" link at the bottom of the page
+  - Click on the "Confirm" link and the OK button that pops up
+If there aren't any items, proceed to step 3.
 ---
 
 ### Step 3: Output Summary
 - Once all pending read assignments have been confirmed, output a summary including:
-  - **List of pending read assignments**.
+  - **List of pending read assignments** (if any).
   - **Info text if there weren't any pending read assignments**.
 """
 model = AzureChatOpenAI(azure_deployment="gpt-4o-2024-08-06",
                         api_version="2024-09-01-preview",
                         model="gpt-4o-2024-08-06")
 
+browser=Browser()
 
 async def main():
     agent = Agent(
         task=task,
         llm=model,
         sensitive_data={"x_username": "stefan.bley@zeiss.com"},
-        browser_context=BrowserContext(browser=Browser(), config=BrowserContextConfig(
+        browser_context=BrowserContext(browser=browser, config=BrowserContextConfig(
             allowed_domains=['microsoftonline.com', 'zeiss.com'])),
         # Workaround for https://github.com/browser-use/browser-use/issues/1578
         tool_calling_method="function_calling"
     )
     await agent.run()
+    input('Press Enter to close the browser...')
+    await browser.close()
 
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())
